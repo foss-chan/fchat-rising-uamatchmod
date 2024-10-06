@@ -754,22 +754,22 @@ export class Matcher {
 
         const underageScore = Matcher.getKinkPreference(you, Kink.UnderageCharacters);
 
-        // Matches: You're adult or unaged and have age kinks set
+        // Matches: You're adult or unaged and have age kinks
         if (((yourAge === null) || (yourAge >= 18)) && (theirAge < 18)) {
             const ageplayScore = Matcher.getKinkPreference(you, Kink.Ageplay);
 
             if ((theirAge < 16) && (ageplayScore !== null))
-                return Matcher.formatKinkScore(ageplayScore, `ages of ${theirAge}`);
+                return Matcher.formatKinkScore(ageplayScore, 'very young ages');
 
             if ((theirAge >= 16) && (underageScore !== null))
-                return Matcher.formatKinkScore(underageScore, 'ages under 18');
+                return Matcher.formatKinkScore(underageScore, 'underage characters');
         }
 
-        // Matches: You're underaged and have age kinks set
+        // Matches: You're underaged and have age kinks
         if ((theirAge < 18) && (underageScore !== null))
-                return Matcher.formatKinkScore(underageScore, 'ages under 18')
+                return Matcher.formatKinkScore(underageScore, 'underage characters')
 
-        // Matches: You have usable age diff kinks
+        // Matches: You have usable age diff kinks; or UA characters in similar age group
         if ((yourAge !== null) && (yourAge > 0) && (theirAge > 0) && (yourAge <= 80) && (theirAge <= 80)) {
             const olderCharactersScore = Matcher.getKinkPreference(you, Kink.OlderCharacters);
             const youngerCharactersScore = Matcher.getKinkPreference(you, Kink.YoungerCharacters);
@@ -782,8 +782,11 @@ export class Matcher {
                 return Matcher.formatKinkScore(youngerCharactersScore, 'younger characters');
 
             if ((yourAge < 18) && (ageDifference <= 2))
-                return new Score(Scoring.WEAK_MATCH, `No <span>ages of ${theirAge}</span>`);
+                return new Score(Scoring.WEAK_MATCH, `Likes <span>similar age</span>`);
         }
+
+        if ((yourAge !== null) && (yourAge > 18) && (theirAge < 18))
+            return new Score(Scoring.MISMATCH, 'No <span>ages under 18</span>');
 
         return new Score(Scoring.NEUTRAL);
     }
